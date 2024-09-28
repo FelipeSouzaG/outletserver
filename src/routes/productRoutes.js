@@ -1,13 +1,18 @@
 import express from "express";
+import { upload } from "../middlewares/storage.js";
 import ProductController from "../controllers/ProductController.js";
 import Auth from "../middlewares/auth.js";
+import { ImageMiddleware } from "../middlewares/storage.js";
 
 const router = express.Router();
 
-router.post("/products", Auth.authenticateUser, Auth.authorizeAdmin, ProductController.registerProduct);
-router.get("/products/:id", Auth.authenticateUser, Auth.authorizeAdmin, ProductController.getProduct);
-router.put("/products/:id", Auth.authenticateUser, Auth.authorizeAdmin, ProductController.updateProduct);
-router.delete("/products/:id", Auth.authenticateUser, Auth.authorizeAdmin, ProductController.deleteProduct);
-router.get("/products", Auth.authenticateUser, Auth.authorizeAdmin, ProductController.listAllProducts);
+router.post(
+  "/products",
+  Auth.authenticateUser,
+  Auth.authorizeAdmin,
+  upload.array("image", 10),
+  ImageMiddleware.processImages,
+  ProductController.createProductWithImages
+);
 
 export default router;
