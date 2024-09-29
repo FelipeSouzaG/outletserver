@@ -56,6 +56,17 @@ class ProductController {
       res.status(500).json({ message: "Erro ao criar o produto.", error: error.message });
     }
   }
+
+  static listPublicProducts = async (req, res, next) => {
+    try {
+      const allProducts = await Product.find();
+      res.status(200).json(allProducts);
+    } catch (error) {
+      console.error("Erro no listPublicProducts:", error);
+      next(error);
+    }
+  };
+  
 }
 
 export default ProductController;
