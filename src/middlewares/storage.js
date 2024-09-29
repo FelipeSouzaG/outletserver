@@ -2,7 +2,6 @@ import multer from "multer";
 import sharp from "sharp";
 import pLimit from "p-limit";
 
-// Configuração do multer
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
@@ -13,12 +12,10 @@ class ImageMiddleware {
         return res.status(400).json({ message: "Nenhuma imagem foi enviada." });
       }
 
-      
-      const limit = pLimit(5); // Limitar a 5 processos simultâneos
-
+      const limit = pLimit(5);
       req.processedImages = await Promise.all(
-        req.files.map(file => limit(async () => {
-          try {
+        req.files.map((file) =>
+          limit(async () => {
             const { originalname, buffer } = file;
             const filename = `${Date.now()}-${originalname.replace(/\.[^/.]+$/, "")}.webp`;
 
@@ -27,7 +24,6 @@ class ImageMiddleware {
 
             const targetWidth = 800;
             const targetHeight = 600;
-
             const originalAspectRatio = metadata.width / metadata.height;
             const targetAspectRatio = targetWidth / targetHeight;
 
@@ -55,16 +51,14 @@ class ImageMiddleware {
               })
               .extend(extendOptions)
               .resize(targetWidth, targetHeight)
-              .webp({ quality: 80 }) // Ajuste da qualidade
+              .webp({ quality: 80 })
               .toBuffer();
 
             return { filename, buffer: processedBuffer };
-          } catch (error) {
-            console.error(`Erro ao processar a imagem ${file.originalname}:`, error);
-            throw error;
-          }
-        }))
+          })
+        )
       );
+
       next();
     } catch (error) {
       console.error("Erro ao processar imagens:", error);
